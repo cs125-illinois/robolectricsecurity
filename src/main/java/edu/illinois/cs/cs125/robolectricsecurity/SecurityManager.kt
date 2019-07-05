@@ -7,7 +7,7 @@ import java.security.Permission
 import java.util.*
 import java.util.logging.LoggingPermission
 
-@Suppress("NewApi")
+@Suppress("unused", "SameParameterValue")
 class RobolectricCompatibleSecurityManager : SecurityManager() {
 
     private val initialDirectory = File(".").absolutePath.replace('\\', '/').trimEnd('.', '/')
