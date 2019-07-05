@@ -7,7 +7,7 @@ import java.security.Permission
 import java.util.*
 import java.util.logging.LoggingPermission
 
-@Suppress("unused", "SameParameterValue")
+@Suppress("unused", "SameParameterValue", "NewApi")
 class RobolectricCompatibleSecurityManager : SecurityManager() {
 
     private val initialDirectory = File(".").absolutePath.replace('\\', '/').trimEnd('.', '/')
@@ -95,7 +95,12 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
             if (perm.name.startsWith("sun.") && beforeUntrustedContext("javax.imageio.")) return
             if (perm.name.startsWith("robolectric.") && beforeUntrustedContext("org.robolectric.")) return
             if (perm.name.contains(".xml.") && beforeUntrustedContext("javax.xml.")) return
-            if (perm.name == "file.encoding" && beforeUntrustedContext("java.net.URLEncoder")) return
+            if (perm.name.startsWith("http.") && beforeUntrustedContext("java.net.")) return
+            if (beforeUntrustedContext("java.net.") && (perm.name == "file.encoding" ||
+                            perm.name.startsWith("http.") ||
+                            perm.name.startsWith("java.protocol.") ||
+                            perm.name.contains(".http.") ||
+                            perm.name == "java.home")) return
             if (beforeUntrustedContext("org.robolectric.res.builder.")) return
             if (beforeUntrustedContext("java.awt.Toolkit")) return
         }
@@ -125,6 +130,7 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
         if (perm is LoggingPermission || perm.name.startsWith("accessClassInPackage.sun.util.logging.") ||
                 perm.name == "accessClassInPackage.sun.awt.resources") {
             if (beforeUntrustedContext("org.robolectric.shadows.")) return
+            if (beforeUntrustedContext("java.net.")) return
         }
         if (perm.name in setOf("getClassLoader", "accessDeclaredMembers", "suppressAccessChecks")) {
             if (beforeUntrustedContext("android.") ||
@@ -135,6 +141,7 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
                     beforeUntrustedContext("org.powermock.core.MockGateway\$MockInvocation") ||
                     beforeUntrustedContext("org.powermock.reflect.internal") ||
                     beforeUntrustedContext("org.powermock.api.mockito.repackaged.") ||
+                    beforeUntrustedContext("java.net.URL") ||
                     beforeUntrustedContext("java.util.EnumMap") ||
                     beforeUntrustedContext("java.lang.invoke.CallSite")) return
         }

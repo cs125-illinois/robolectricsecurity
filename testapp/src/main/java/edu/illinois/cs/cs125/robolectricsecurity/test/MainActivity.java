@@ -16,6 +16,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -71,6 +73,11 @@ public class MainActivity extends AppCompatActivity {
 
     void trySneakyWriteFile() throws IOException {
         new File(getFilesDir() + "/../../../unsafe.txt").createNewFile();
+    }
+
+    void tryHttpRequest() throws IOException {
+        URL google = new URL("http://www.google.com/");
+        google.openConnection().getContent();
     }
 
 }

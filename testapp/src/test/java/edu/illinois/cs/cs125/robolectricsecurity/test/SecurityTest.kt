@@ -34,4 +34,9 @@ class SecurityTest {
         activity.trySneakyWriteFile()
     }
 
+    @Test(expected = SecurityException::class)
+    fun testNetwork() {
+        activity.tryHttpRequest()
+    }
+
 }
