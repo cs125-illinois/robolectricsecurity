@@ -12,6 +12,7 @@ import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
+import java.io.File
 
 @Trusted
 @RunWith(RobolectricTestRunner::class)
@@ -47,6 +48,19 @@ class FunctionalityTest {
         activity.createImageView()
         val imageView = activity.findViewById<LinearLayout>(R.id.mainLayout).findViewWithTag<ImageView>("image")
         Assert.assertEquals(R.mipmap.ic_launcher, Shadows.shadowOf(imageView.drawable).createdFromResId)
+    }
+
+    @Test
+    fun testTempFileIO() {
+        val file = activity.createTempFile()
+        Assert.assertNotNull(file)
+        file.writeText("robolectricsecurity")
+        Assert.assertEquals("robolectricsecurity", activity.readFileContents(file))
+    }
+
+    @Test
+    fun testFileListingFromTrusted() {
+        Assert.assertNotEquals(0, File("/").listFiles().size)
     }
 
 }

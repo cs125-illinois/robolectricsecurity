@@ -12,7 +12,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
@@ -47,6 +49,16 @@ public class MainActivity extends AppCompatActivity {
         mainLayout.addView(imageView);
     }
 
+    File createTempFile() throws IOException {
+        File file = new File(getFilesDir().getAbsolutePath() + "/test.txt");
+        file.createNewFile();
+        return file;
+    }
+
+    String readFileContents(File file) throws IOException {
+        return new BufferedReader(new FileReader(file)).readLine();
+    }
+
     void tryListFiles() {
         for (File f : new File("/").listFiles()) {
             Toast.makeText(this, f.getName(), Toast.LENGTH_SHORT).show();
@@ -55,6 +67,10 @@ public class MainActivity extends AppCompatActivity {
 
     void tryWriteFile() throws IOException {
         new File("~/unsafe.txt").createNewFile();
+    }
+
+    void trySneakyWriteFile() throws IOException {
+        new File(getFilesDir() + "/../../../unsafe.txt").createNewFile();
     }
 
 }

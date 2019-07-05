@@ -1,7 +1,6 @@
 package edu.illinois.cs.cs125.robolectricsecurity.test
 
 import edu.illinois.cs.cs125.robolectricsecurity.Trusted
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,6 +27,11 @@ class SecurityTest {
     @Test(expected = SecurityException::class)
     fun testFileWrite() {
         activity.tryWriteFile()
+    }
+
+    @Test(expected = SecurityException::class)
+    fun testSneakyFileWrite() {
+        activity.trySneakyWriteFile()
     }
 
 }
