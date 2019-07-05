@@ -16,8 +16,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -61,6 +61,12 @@ public class MainActivity extends AppCompatActivity {
         return new BufferedReader(new FileReader(file)).readLine();
     }
 
+    char findFirstLowercase(String[] strings) throws Throwable {
+        return Arrays.stream(strings).filter(s -> Character.isLowerCase(s.charAt(0)))
+                .map(s -> s.charAt(0))
+                .findFirst().orElseThrow(() -> new RuntimeException("Not found"));
+    }
+
     void tryListFiles() {
         for (File f : new File("/").listFiles()) {
             Toast.makeText(this, f.getName(), Toast.LENGTH_SHORT).show();
@@ -78,6 +84,14 @@ public class MainActivity extends AppCompatActivity {
     void tryHttpRequest() throws IOException {
         URL google = new URL("http://www.google.com/");
         google.openConnection().getContent();
+    }
+
+    void tryExit() {
+        System.exit(125);
+    }
+
+    void tryRemoveSecurityManager() {
+        System.setSecurityManager(null);
     }
 
 }

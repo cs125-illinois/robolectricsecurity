@@ -39,4 +39,14 @@ class SecurityTest {
         activity.tryHttpRequest()
     }
 
+    @Test(expected = SecurityException::class)
+    fun testExit() {
+        activity.tryExit()
+    }
+
+    @Test(expected = SecurityException::class)
+    fun testRemoveSM() {
+        activity.tryRemoveSecurityManager()
+    }
+
 }

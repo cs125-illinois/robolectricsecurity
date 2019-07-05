@@ -63,4 +63,9 @@ class FunctionalityTest {
         Assert.assertNotEquals(0, File("/").listFiles().size)
     }
 
+    @Test
+    fun testStreams() {
+        Assert.assertEquals('c', activity.findFirstLowercase(arrayOf("A", "B", "c", "d", "E")))
+    }
+
 }
