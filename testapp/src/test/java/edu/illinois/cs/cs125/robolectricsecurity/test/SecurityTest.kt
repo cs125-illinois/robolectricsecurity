@@ -1,6 +1,5 @@
 package edu.illinois.cs.cs125.robolectricsecurity.test
 
-import android.app.Activity
 import edu.illinois.cs.cs125.robolectricsecurity.Trusted
 import org.junit.Assert
 import org.junit.Before
@@ -13,23 +12,22 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class SecurityTest {
 
+    private lateinit var activity: MainActivity
+
     @Before
-    fun installSM() {
+    fun before() {
         ensureSecurityManagerInstalled()
+        activity = Robolectric.buildActivity(MainActivity::class.java).create().start().resume().get()
     }
 
-    private fun setupActivity(): Activity {
-        return Robolectric.buildActivity(MainActivity::class.java).create().start().resume().get()
+    @Test(expected = SecurityException::class)
+    fun testFileListing() {
+        activity.tryListFiles()
     }
 
-    @Test
-    fun testSecurityManagerInstalled() {
-        Assert.assertEquals("RobolectricCompatibleSecurityManager", System.getSecurityManager()!!.javaClass.simpleName)
-    }
-
-    @Test
-    fun testActivitySetup() {
-        setupActivity()
+    @Test(expected = SecurityException::class)
+    fun testFileWrite() {
+        activity.tryWriteFile()
     }
 
 }
