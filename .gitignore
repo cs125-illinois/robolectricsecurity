@@ -4,3 +4,4 @@ out/
 build/
 gen/
 *.iml
+local.properties

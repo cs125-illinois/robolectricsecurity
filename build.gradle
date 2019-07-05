@@ -1,37 +1,20 @@
 buildscript {
-    ext.kotlin_version = '1.3.41'
     repositories {
-        mavenCentral()
+        google()
+        jcenter()
     }
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.android.tools.build:gradle:3.4.1'
     }
 }
 
-plugins {
-    id "com.github.johnrengelman.shadow" version "5.1.0"
-}
-
-apply plugin: 'java'
-apply plugin: 'kotlin'
-
-configurations {
-    shadow
-}
-
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    shadow "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-}
-
-sourceCompatibility = "8"
-targetCompatibility = "8"
-
-repositories {
-    mavenCentral()
-}
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
+allprojects {
+    repositories {
+        google()
+        jcenter()
     }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
