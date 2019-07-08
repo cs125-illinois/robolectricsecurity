@@ -54,4 +54,9 @@ class SecurityTest {
         activity.tryRunProgram()
     }
 
+    @Test(expected = SecurityException::class)
+    fun testReflectiveSetOut() {
+        activity.tryReflectiveSetOut()
+    }
+
 }

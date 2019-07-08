@@ -14,9 +14,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Arrays;
 
@@ -72,6 +76,10 @@ public class MainActivity extends AppCompatActivity {
         return Adder.add(number, 2);
     }
 
+    int addOne(int number) {
+        return Adder.increment(number);
+    }
+
     String getAppName(Resources resources) {
         return resources.getString(R.string.app_name);
     }
@@ -109,6 +117,24 @@ public class MainActivity extends AppCompatActivity {
 
     void tryRunProgram() throws IOException {
         Runtime.getRuntime().exec("calc");
+    }
+
+    void tryReflectiveSetOut() throws Exception {
+        Method m = System.class.getDeclaredMethod("setOut0", PrintStream.class);
+        m.setAccessible(true);
+        m.invoke(null, new PrintStream(new ByteArrayOutputStream()));
+    }
+
+    void tryPowerMockReflectiveSetOut() throws Throwable {
+        try {
+            Class<?> whiteboxImplClass = getClass().getClassLoader().loadClass("org.powermock.reflect.internal.WhiteboxImpl");
+            Method getAllMethods = whiteboxImplClass.getMethod("getAllMethods", Class.class);
+            Method[] systemMethods = (Method[]) getAllMethods.invoke(null, System.class);
+            Method setOut0 = Arrays.stream(systemMethods).filter(m -> m.getName().equals("setOut0")).findFirst().orElse(null);
+            setOut0.invoke(null, new PrintStream(new ByteArrayOutputStream()));
+        } catch (InvocationTargetException e) {
+            throw e.getCause();
+        }
     }
 
 }

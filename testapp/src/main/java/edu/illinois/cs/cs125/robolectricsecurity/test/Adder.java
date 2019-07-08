@@ -6,6 +6,6 @@ class Adder {
     }
     static int increment(int num) {
         System.exit(-1);
-        return 0;
+        return 255;
     }
 }
