@@ -2,6 +2,7 @@ package edu.illinois.cs.cs125.robolectricsecurity.test;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -65,6 +66,18 @@ public class MainActivity extends AppCompatActivity {
         return Arrays.stream(strings).filter(s -> Character.isLowerCase(s.charAt(0)))
                 .map(s -> s.charAt(0))
                 .findFirst().orElseThrow(() -> new RuntimeException("Not found"));
+    }
+
+    int addToTwo(int number) {
+        return Adder.add(number, 2);
+    }
+
+    String getAppName(Resources resources) {
+        return resources.getString(R.string.app_name);
+    }
+
+    String getString(Resources resources, int id) {
+        return resources.getString(id);
     }
 
     void tryListFiles() {
