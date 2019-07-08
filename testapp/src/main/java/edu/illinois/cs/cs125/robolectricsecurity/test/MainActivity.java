@@ -94,4 +94,8 @@ public class MainActivity extends AppCompatActivity {
         System.setSecurityManager(null);
     }
 
+    void tryRunProgram() throws IOException {
+        Runtime.getRuntime().exec("calc");
+    }
+
 }

@@ -49,4 +49,9 @@ class SecurityTest {
         activity.tryRemoveSecurityManager()
     }
 
+    @Test(expected = SecurityException::class)
+    fun testRunProcess() {
+        activity.tryRunProgram()
+    }
+
 }
