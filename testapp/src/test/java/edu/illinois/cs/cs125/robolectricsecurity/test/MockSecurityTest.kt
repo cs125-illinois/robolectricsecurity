@@ -15,7 +15,7 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-@PowerMockIgnore("org.mockito.*", "org.robolectric.*", "android.*", "androidx.*")
+@PowerMockIgnore("org.mockito.*", "org.powermock.*", "org.robolectric.*", "android.*", "androidx.*")
 @PrepareForTest(Adder::class)
 @Trusted
 class MockSecurityTest {
