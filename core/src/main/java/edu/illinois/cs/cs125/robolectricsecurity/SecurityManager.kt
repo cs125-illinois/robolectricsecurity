@@ -150,6 +150,7 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
         if (perm.name == "createClassLoader") {
             if (beforeUntrustedContext("android.content.res.")) return
             if (beforeUntrustedContext("android.view.")) return
+            if (beforeUntrustedContext("androidx.appcompat.widget.ViewUtils")) return
             if (beforeUntrustedContext("android.graphics.")) return
             if (beforeUntrustedContext("org.robolectric.internal.bytecode.ShadowImpl")) return
         }
