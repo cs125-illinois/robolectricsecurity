@@ -15,6 +15,8 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
             get() = System.getProperty("untrusted.package")
     private val trustedName: String
             get() = Trusted::class.java.name
+    private val logDenials: Boolean
+            get() = System.getProperty("log.denials")?.toBoolean() ?: false
 
     private val checking: ThreadLocal<Boolean> = ThreadLocal.withInitial { false }
 
@@ -83,7 +85,7 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
     private fun checkPermissionInternal(perm: Permission) {
         if (fullyTrustedContext()) return
         if (calledByUntrusted("java.lang.reflect.")) {
-            super.checkPermission(perm)
+            delegatePermissionCheck(perm)
             return
         }
         if (perm is PropertyPermission && perm.actions == "read") {
@@ -168,7 +170,16 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
         if (perm.name == "accessDeclaredMembers") {
             if (afterOneUntrustedContext("org.objenesis.")) return
         }
+        delegatePermissionCheck(perm)
+    }
+    
+    fun delegatePermissionCheck(perm: Permission) {
+        if (logDenials) {
+            System.err.println("RobolectricCompatibleSecurityManager: Not allowing $perm from:")
+            Exception().printStackTrace(System.err)
+        }
         super.checkPermission(perm)
+        System.err.println("Allowed by SecurityManager")
     }
 
 }
