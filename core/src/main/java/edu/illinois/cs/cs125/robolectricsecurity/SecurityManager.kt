@@ -41,6 +41,14 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
         return true
     }
 
+    private fun beforeUntrustedContextUsingStackTrace(okPackage: String): Boolean {
+        Thread.currentThread().stackTrace.forEach {
+            if (it.className.startsWith(untrustedPackage)) return false
+            if (it.className.startsWith(okPackage)) return true
+        }
+        return true
+    }
+
     private fun afterOneUntrustedContext(okPackage: String): Boolean {
         var hasUntrusted = false
         var inUntrusted = false
@@ -85,26 +93,32 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
     private fun checkPermissionInternal(perm: Permission) {
         if (fullyTrustedContext()) return
         if (calledByUntrusted("java.lang.reflect.")) {
+            if (logDenials) System.err.println("RobolectricCompatibleSecurityManager: Using reflective restrictive permission check")
             delegatePermissionCheck(perm)
             return
         }
-        if (perm is PropertyPermission && perm.actions == "read") {
-            if (perm.name == "line.separator") return
-            if (perm.name.startsWith("android.")) return
-            if (perm.name.startsWith("http.") && beforeUntrustedContext("android.net.")) return
-            if (perm.name.endsWith(".version") && beforeUntrustedContext("sun.awt.")) return
-            if (perm.name.startsWith("AWT.") && beforeUntrustedContext("sun.awt.")) return
-            if (perm.name.startsWith("sun.") && beforeUntrustedContext("javax.imageio.")) return
-            if (perm.name.startsWith("robolectric.") && beforeUntrustedContext("org.robolectric.")) return
-            if (perm.name.contains(".xml.") && beforeUntrustedContext("javax.xml.")) return
-            if (perm.name.startsWith("http.") && beforeUntrustedContext("java.net.")) return
-            if (beforeUntrustedContext("java.net.") && (perm.name == "file.encoding" ||
-                            perm.name.startsWith("http.") ||
-                            perm.name.startsWith("java.protocol.") ||
-                            perm.name.contains(".http.") ||
-                            perm.name == "java.home")) return
-            if (beforeUntrustedContext("org.robolectric.res.builder.")) return
-            if (beforeUntrustedContext("java.awt.Toolkit")) return
+        if (beforeUntrustedContextUsingStackTrace("java.lang.ClassLoader\$NativeLibrary")) return
+        if (perm is PropertyPermission) {
+            if (perm.actions == "read") {
+                if (perm.name == "line.separator") return
+                if (perm.name.startsWith("android.")) return
+                if (perm.name.startsWith("http.") && beforeUntrustedContext("android.net.")) return
+                if (perm.name.endsWith(".version") && beforeUntrustedContext("sun.awt.")) return
+                if (perm.name.toLowerCase().startsWith("awt.") && beforeUntrustedContext("sun.awt.")) return
+                if (perm.name.startsWith("sun.") && beforeUntrustedContext("javax.imageio.")) return
+                if (perm.name.startsWith("robolectric.") && beforeUntrustedContext("org.robolectric.")) return
+                if (perm.name.contains(".xml.") && beforeUntrustedContext("javax.xml.")) return
+                if (perm.name.startsWith("http.") && beforeUntrustedContext("java.net.")) return
+                if (beforeUntrustedContext("java.net.") && (perm.name == "file.encoding" ||
+                                perm.name.startsWith("http.") ||
+                                perm.name.startsWith("java.protocol.") ||
+                                perm.name.contains(".http.") ||
+                                perm.name == "java.home")) return
+                if (beforeUntrustedContext("org.robolectric.res.builder.")) return
+                if (beforeUntrustedContext("java.awt.Toolkit")) return
+            } else if (perm.actions == "write") {
+                if (perm.name.startsWith("javax.") && beforeUntrustedContext("java.awt.Toolkit")) return
+            }
         }
         if (perm.name.startsWith("getenv.") && beforeUntrustedContext("java.awt.")) return
         if (perm is FilePermission) {
