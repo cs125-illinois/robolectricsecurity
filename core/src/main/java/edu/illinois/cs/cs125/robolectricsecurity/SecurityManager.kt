@@ -112,6 +112,7 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
                 if (perm.name.contains(".xml.") && beforeUntrustedContext("javax.xml.")) return
                 if (perm.name.startsWith("http.") && beforeUntrustedContext("java.net.")) return
                 if (perm.name.startsWith("java.") && beforeUntrustedContext("org.mockito.internal.creation.")) return
+                if (perm.name.startsWith("javafx.") && beforeUntrustedContext("java.awt.")) return
                 if (beforeUntrustedContext("java.net.") && (perm.name == "file.encoding" ||
                                 perm.name.startsWith("http.") ||
                                 perm.name.startsWith("java.protocol.") ||
@@ -123,7 +124,12 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
                 if (perm.name.startsWith("javax.") && beforeUntrustedContext("java.awt.Toolkit")) return
             }
         }
+        if (perm.name.startsWith("getProperty.")) {
+            if (beforeUntrustedContext("java.security.Provider")) return
+        }
         if (perm.name.startsWith("getenv.") && beforeUntrustedContext("java.awt.")) return
+        if (perm.name == "loggerFinder" && beforeUntrustedContext("jdk.internal.logger.")) return
+        if (perm.name == "localeServiceProvider" && beforeUntrustedContext("java.text.")) return
         if (perm is FilePermission) {
             if (perm.actions == "read") {
                 val fwdSlashPath = perm.name.replace('\\', '/')
@@ -178,8 +184,13 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
             if (beforeUntrustedContext("org.mockito.internal.invocation.")) return
             if (beforeUntrustedContext("org.robolectric.internal.bytecode.ShadowImpl")) return
         }
-        if (perm.name == "accessClassInPackage.sun.misc") {
+        if (perm.name in setOf("accessClassInPackage.sun.misc", "accessClassInPackage.jdk.internal.loader")) {
             if (beforeUntrustedContext("org.robolectric.internal.bytecode.SandboxClassLoader")) return
+        }
+        if (perm.name == "accessSystemModules") {
+            if (beforeUntrustedContext("org.robolectric.internal.bytecode.SandboxClassLoader")) return
+            if (beforeUntrustedContext("java.awt.Toolkit")) return
+            if (beforeUntrustedContext("sun.util.resources.")) return
         }
         if (perm.name == "accessClassInPackage.sun.reflect" || perm.name == "reflectionFactoryAccess") {
             if (beforeUntrustedContext("org.mockito.internal.creation.instance.")) return
@@ -195,6 +206,8 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
         if (perm.name == "getProtectionDomain") {
             if (beforeUntrustedContext("org.powermock.core.classloader.")) return
             if (beforeUntrustedContext("org.mockito.internal.creation.bytebuddy.")) return
+            if (beforeUntrustedContext("jdk.internal.logger.")) return
+            if (beforeUntrustedContext("java.util.ResourceBundle")) return
         }
         if (perm.name == "accessDeclaredMembers") {
             if (afterOneUntrustedContext("org.objenesis.")) return
@@ -211,7 +224,10 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
     fun delegatePermissionCheck(perm: Permission) {
         if (logDenials) {
             System.err.println("RobolectricCompatibleSecurityManager: Not allowing $perm from:")
-            SecurityException().printStackTrace(System.err)
+            classContext.forEach {
+                System.err.println("    ${it.name}")
+            }
+            System.err.println()
         }
         super.checkPermission(perm)
         if (logDenials) System.err.println("Allowed by SecurityManager")
