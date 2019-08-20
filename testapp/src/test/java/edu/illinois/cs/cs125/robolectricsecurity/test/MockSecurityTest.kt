@@ -49,4 +49,20 @@ class MockSecurityTest {
         activity.tryPowerMockReflectiveSetOut()
     }
 
+    @Test(expected = SecurityException::class)
+    fun testIndirectReflectionExploitFromTrustedReflection() {
+        activity.tryPowerMockReflectiveSetOutFromTrustedReflection()
+    }
+
+    @Test
+    fun testIndirectReflectionExploitAfterTrusted() {
+        Assert.assertNotNull(activity.createTempFileReflective())
+        try {
+            activity.tryPowerMockReflectiveSetOut()
+            Assert.fail("tryPowerMockReflectiveSetOut completed")
+        } catch (e: SecurityException) {
+            // Expected
+        }
+    }
+
 }

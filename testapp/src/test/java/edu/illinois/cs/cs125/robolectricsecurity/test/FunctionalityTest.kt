@@ -68,4 +68,9 @@ class FunctionalityTest {
         Assert.assertEquals('c', activity.findFirstLowercase(arrayOf("A", "B", "c", "d", "E")))
     }
 
+    @Test
+    fun testTrustedReflection() {
+        Assert.assertNotNull(activity.createTempFileReflective())
+    }
+
 }

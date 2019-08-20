@@ -62,6 +62,10 @@ public class MainActivity extends AppCompatActivity {
         return file;
     }
 
+    File createTempFileReflective() throws Exception {
+        return (File) getClass().getDeclaredMethod("createTempFile").invoke(this);
+    }
+
     String readFileContents(File file) throws IOException {
         return new BufferedReader(new FileReader(file)).readLine();
     }
@@ -132,6 +136,14 @@ public class MainActivity extends AppCompatActivity {
             Method[] systemMethods = (Method[]) getAllMethods.invoke(null, System.class);
             Method setOut0 = Arrays.stream(systemMethods).filter(m -> m.getName().equals("setOut0")).findFirst().orElse(null);
             setOut0.invoke(null, new PrintStream(new ByteArrayOutputStream()));
+        } catch (InvocationTargetException e) {
+            throw e.getCause();
+        }
+    }
+
+    void tryPowerMockReflectiveSetOutFromTrustedReflection() throws Throwable {
+        try {
+            getClass().getDeclaredMethod("tryPowerMockReflectiveSetOut").invoke(this);
         } catch (InvocationTargetException e) {
             throw e.getCause();
         }

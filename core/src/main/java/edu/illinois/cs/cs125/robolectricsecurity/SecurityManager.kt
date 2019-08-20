@@ -12,18 +12,18 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
 
     private val initialDirectory = File(".").absolutePath.replace('\\', '/').trimEnd('.', '/')
     private val trustedPackages: String
-            get() = System.getProperty("trusted.packages") ?: ""
+            get() = System.getProperty("rcsm.trusted") ?: ""
     private val trustedName: String
             get() = Trusted::class.java.name
     private val logDenials: Boolean
-            get() = System.getProperty("log.denials")?.toBoolean() ?: false
+            get() = System.getProperty("rcsm.log")?.toBoolean() ?: false
 
     private var untrustedPackage: String
 
     private val checking: ThreadLocal<Boolean> = ThreadLocal.withInitial { false }
 
     private fun getUntrustedPackage(): String {
-        return System.getProperty("untrusted.package")
+        return System.getProperty("rcsm.untrustedpackage")
     }
 
     init {
@@ -75,12 +75,24 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
         return false
     }
 
-    private fun calledByUntrusted(dangerousPackage: String): Boolean {
+    private fun isPermittedCaller(clazz: Class<*>, method: String, permitKey: String): Boolean {
+        val permitted = System.getProperty("rcsm.permitted.$permitKey") ?: return false
+        permitted.split(';').filter { it.isNotEmpty() }.forEach {
+            val parts = it.split('#', limit = 2)
+            val effectiveClass = "$untrustedPackage.${parts[0]}"
+            if (effectiveClass != clazz.name) return@forEach
+            if (parts[1] != method) return@forEach
+            return clazz.declaredMethods.filter { m -> m.name == parts[1] }.size == 1
+        }
+        return false
+    }
+
+    private fun calledByUntrusted(dangerousPackage: String, permitKey: String): Boolean {
         var sawDangerous = false
         val loader = loaderForUntrusted()
         Thread.currentThread().stackTrace.forEach {
             val clazz = try { Class.forName(it.className, false, loader) } catch (e: ClassNotFoundException) { null }
-            if (clazz != null && untrusted(clazz) && sawDangerous) return true
+            if (clazz != null && untrusted(clazz) && sawDangerous && !isPermittedCaller(clazz, it.methodName, permitKey)) return true
             sawDangerous = it.className.startsWith(dangerousPackage)
         }
         return false
@@ -103,7 +115,7 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
 
     private fun checkPermissionInternal(perm: Permission) {
         if (fullyTrustedContext()) return
-        if (calledByUntrusted("java.lang.reflect.")) {
+        if (calledByUntrusted("java.lang.reflect.", "reflect")) {
             if (logDenials) System.err.println("RobolectricCompatibleSecurityManager: Using reflective restrictive permission check")
             delegatePermissionCheck(perm)
             return

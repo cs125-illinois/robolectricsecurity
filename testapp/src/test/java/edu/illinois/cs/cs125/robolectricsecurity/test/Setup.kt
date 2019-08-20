@@ -4,7 +4,8 @@ import edu.illinois.cs.cs125.robolectricsecurity.RobolectricCompatibleSecurityMa
 
 fun ensureSecurityManagerInstalled() {
     if (System.getSecurityManager() != null) return
-    System.setProperty("untrusted.package", "edu.illinois.cs.cs125.robolectricsecurity.test")
-    System.setProperty("log.denials", "true")
+    System.setProperty("rcsm.untrustedpackage", "edu.illinois.cs.cs125.robolectricsecurity.test")
+    System.setProperty("rcsm.log", "true")
+    System.setProperty("rcsm.permitted.reflect", "MainActivity#createTempFileReflective;MainActivity#tryPowerMockReflectiveSetOutFromTrustedReflection")
     System.setSecurityManager(RobolectricCompatibleSecurityManager())
 }
