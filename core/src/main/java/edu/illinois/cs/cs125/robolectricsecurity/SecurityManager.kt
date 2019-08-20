@@ -11,8 +11,6 @@ import java.util.logging.LoggingPermission
 class RobolectricCompatibleSecurityManager : SecurityManager() {
 
     private val initialDirectory = File(".").absolutePath.replace('\\', '/').trimEnd('.', '/')
-    private val untrustedPackage: String
-            get() = System.getProperty("untrusted.package")
     private val trustedPackages: String
             get() = System.getProperty("trusted.packages") ?: ""
     private val trustedName: String
@@ -20,7 +18,17 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
     private val logDenials: Boolean
             get() = System.getProperty("log.denials")?.toBoolean() ?: false
 
+    private var untrustedPackage: String
+
     private val checking: ThreadLocal<Boolean> = ThreadLocal.withInitial { false }
+
+    private fun getUntrustedPackage(): String {
+        return System.getProperty("untrusted.package")
+    }
+
+    init {
+        untrustedPackage = getUntrustedPackage()
+    }
 
     private fun outermostClass(clazz: Class<*>): Class<*> {
         return clazz.classLoader.loadClass(clazz.name.split('$', limit = 2)[0])
@@ -85,6 +93,7 @@ class RobolectricCompatibleSecurityManager : SecurityManager() {
     override fun checkPermission(perm: Permission?) {
         if (checking.get()) return
         checking.set(true)
+        untrustedPackage = getUntrustedPackage()
         try {
             checkPermissionInternal(perm!!)
         } finally {
