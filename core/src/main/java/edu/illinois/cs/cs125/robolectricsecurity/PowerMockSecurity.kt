@@ -95,15 +95,20 @@ class ReadCheckedConcurrentMap<K, V>(
 @Suppress("unused")
 fun secureMockMethodCache() {
     try {
+        val security = System.getSecurityManager() ?: return
         val clazz = Class.forName("org.powermock.reflect.internal.WhiteboxImpl")
         val field = clazz.getDeclaredField("allClassMethodsCache")
         field.isAccessible = true
         val originalMap = field.get(null) as? ConcurrentMap<*, *> ?: return
         if (originalMap.javaClass.name == ReadCheckedConcurrentMap::class.java.name) return
-        val newMap = ReadCheckedConcurrentMap(originalMap, System.getSecurityManager(), ReflectPermission("accessDeclaredMembers"))
+        val newMap = ReadCheckedConcurrentMap(originalMap, security, ReflectPermission("accessDeclaredMembers"))
         field.set(null, newMap)
     } catch (e: Exception) {
-        System.err.println("Couldn't secure PowerMock method cache:")
-        e.printStackTrace()
+        try {
+            if (System.getProperty("rcsm.log")?.toBoolean() == true) {
+                System.err.println("Couldn't secure PowerMock method cache:")
+                e.printStackTrace()
+            }
+        } catch (ignored: Exception) { }
     }
 }

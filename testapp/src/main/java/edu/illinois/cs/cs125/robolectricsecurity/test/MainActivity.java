@@ -2,6 +2,7 @@ package edu.illinois.cs.cs125.robolectricsecurity.test;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -124,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void tryReflectiveSetOut() throws Exception {
-        Method m = System.class.getDeclaredMethod("setOut0", PrintStream.class);
+        @SuppressLint("SoonBlockedPrivateApi") Method m = System.class.getDeclaredMethod("setOut0", PrintStream.class);
         m.setAccessible(true);
         m.invoke(null, new PrintStream(new ByteArrayOutputStream()));
     }
