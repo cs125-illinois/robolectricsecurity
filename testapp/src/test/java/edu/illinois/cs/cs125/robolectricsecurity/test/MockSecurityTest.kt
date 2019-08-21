@@ -1,6 +1,7 @@
 package edu.illinois.cs.cs125.robolectricsecurity.test
 
 import edu.illinois.cs.cs125.robolectricsecurity.Trusted
+import edu.illinois.cs.cs125.robolectricsecurity.secureMockMethodCache
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -29,6 +30,7 @@ class MockSecurityTest {
     @Before
     fun before() {
         ensureSecurityManagerInstalled()
+        secureMockMethodCache()
         activity = Robolectric.buildActivity(MainActivity::class.java).create().start().resume().get()
     }
 
